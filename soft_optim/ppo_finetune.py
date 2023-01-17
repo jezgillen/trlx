@@ -5,6 +5,8 @@ from pathlib import Path
 from transformers import AutoModelWithLMHead
 
 
+from soft_optim.fine_tune import valid_games_fine_tuned_checkpoint
+
 if __name__ == "__main__":
     def reward_fn(samples, prompts=None, outputs=None):
         return [s.count('o') for s in samples]
@@ -15,7 +17,7 @@ if __name__ == "__main__":
     config = TRLConfig.load_yaml(config_path)
 
     # collect a tictactoe generator model that was trained with fine_tune.py
-    model_path = Path(__file__).parent.parent / ".checkpoints/checkpoint-9000"
+    model_path = valid_games_fine_tuned_checkpoint
     
     trainer = trlx.train(
         str(model_path),
@@ -23,5 +25,5 @@ if __name__ == "__main__":
         config=config,
     )
 
-    fine_tuned_model_path = Path(__file__).parent / ".checkpoints/fine_tuned_model"
+    fine_tuned_model_path = Path(__file__).parent / ".checkpoints" / "fine_tuned_model"
     trainer.save(fine_tuned_model_path)

@@ -84,6 +84,7 @@ class BoardState:
 
     def parse_str(self, string):
         lines = string.strip("\n").split("\n")
+        
         # create a dict that does the opposite of self.map
         rev_map = {v:k for k,v in self.map.items()}
         if len(lines) != 3:
@@ -98,7 +99,7 @@ class BoardState:
                 self.board_state[i,j] = rev_map[char]
 
 
-def evaluate_game_string(game_string):
+def evaluate_game_string(game_string) -> int:
     # split game string into board states
     game_states = game_string.split("\n\n")[1:]
     for state in game_states:
@@ -120,7 +121,7 @@ def generate_random_game():
         b.make_move(*valid_moves[move])
         game_state_history.append( str(b) )
 
-    return "Let's play Tic Tac Toe:\n" + "\n".join(game_state_history)
+    return "Let's play Tic Tac Toe:\n" + "\n".join(game_state_history) + "<|endoftext|>"
 
 
 def generate_dataset(number_games: int) -> List[str]:
