@@ -255,6 +255,32 @@ class TicTacToeGame:
             return -1
 
         return 0
+    
+    def get_proxy_reward(self, game_string: str) -> float:
+        '''
+        Return a proxy reward for the full game string.
+        '''
+        #ahhh I'm sorry I'll fix this later
+        self.check_valid_move = False
+        self.check_valid_state = False
+
+        self.board = TicTacToeBoard()
+        self.history = [self.board]
+
+        # split game string into board states
+        board_strings = game_string.split("\n\n")[1:]
+
+        final_outcome = 0
+
+        for board_string in board_strings:
+            outcome, valid = self.add_state(board_string)
+
+            # If the game is won, return score based on winner
+            if outcome and not final_outcome:
+                final_outcome = outcome
+
+        return float(final_outcome == self.board.x)
+
 
 def generate_random_game():
     b = TicTacToeBoard()
