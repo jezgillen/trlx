@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from game import TicTacToeGame
 
 import trlx
 from game import TicTacToeGame
