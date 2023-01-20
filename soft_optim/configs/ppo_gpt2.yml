@@ -39,7 +39,7 @@ method:
   chunk_size: 64
   ppo_epochs: 6
   init_kl_coef: 0.0
-  target: null # keep KL coeff constant
+  target: 6
   horizon: 10000
   gamma: 1
   lam: 0.95
