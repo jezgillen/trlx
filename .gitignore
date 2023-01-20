@@ -11,3 +11,7 @@ __pycache__/
 
 # Weights and biases
 wandb/
+
+# saved models
+*.pkl
+*.bin
