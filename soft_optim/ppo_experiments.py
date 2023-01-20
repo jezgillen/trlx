@@ -7,7 +7,8 @@ from game import TicTacToeGame
 import soft_optim.quantilizer as quantilizer
 
 
-from soft_optim.fine_tune import valid_games_fine_tuned_checkpoint
+
+from soft_optim.fine_tune import valid_games_fine_tuned_checkpoint, infer_game
 
 def no_soft_opt_experiment():
     def reward_fn(samples, prompts=None, outputs=None):
@@ -50,12 +51,7 @@ def soft_opt_experiment():
     model = AutoModelForCausalLM.from_pretrained(model_path).to('cuda')
 
     # get samples for gen error calculation
-    # TODO refactor this into infer_game function in fine_tune.py
-    n = 200
-    game_start_text = "Let's play Tic Tac Toe:\n"
-    tokens = tokenizer([game_start_text]*n, return_tensors="pt").to('cuda')
-    out = model.generate(**tokens, max_length=1000, do_sample=True)
-    samples = tokenizer.batch_decode(out, skip_special_tokens=True)
+    samples = infer_game(model, tokenizer, num_samples=200)    
     proxy_rewards = []
     human_rewards = []
     g_proxy = TicTacToeGame(check_valid_move=False, check_valid_state=False)
@@ -68,10 +64,11 @@ def soft_opt_experiment():
     eps = 0.05 # <5% chance of bound being exceeded
     bound = quantilizer.empirical_error_bound(proxy_rewards, human_rewards, eps)
     # work out proxy reward cutoff
-    cutoff = quantilizer.get_proxy_value_cutoff(bound, len(samples))
+    cutoff = quantilizer.get_proxy_value_cutoff(bound, len(samples), model, tokenizer)
 
     print(bound)
     print(cutoff)
+    exit()
 
     def reward_fn(samples, prompts=None, outputs=None):
         rewards = []
