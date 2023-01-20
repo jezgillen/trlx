@@ -22,7 +22,7 @@ tokenizer:
 optimizer:
   name: "adamw"
   kwargs:
-    lr: 1.0e-5
+    lr: 3.0e-6
     betas: [0.9, 0.95]
     eps: 1.0e-8
     weight_decay: 1.0e-6
@@ -35,10 +35,10 @@ scheduler:
 
 method:
   name: "ppoconfig"
-  num_rollouts: 128
-  chunk_size: 128
-  ppo_epochs: 4
-  init_kl_coef: 0.05
+  num_rollouts: 64
+  chunk_size: 64
+  ppo_epochs: 6
+  init_kl_coef: 0.0
   target: 6
   horizon: 10000
   gamma: 1
@@ -51,7 +51,7 @@ method:
   ref_std: null
   cliprange_reward: 10
   gen_kwargs:
-    max_new_tokens: 40
+    max_new_tokens: 130
     top_k: 0
     top_p: 1.0
     do_sample: True
