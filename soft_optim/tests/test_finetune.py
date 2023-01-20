@@ -43,7 +43,7 @@ class TestCheckModelOutputsValidGame:
         model = AutoModelForCausalLM.from_pretrained(valid_games_fine_tuned_checkpoint)
 
         # Infer the game
-        full_game:str = infer_game(model, tokenizer)
+        full_game:str = infer_game(model, tokenizer)[0]
 
         # Check it is valid
         print("game")
