@@ -39,8 +39,10 @@ def empirical_error_bound(
         reward would be lower than the proxy reward minus this bound, is at most
         epsilon).
     """
-    expected_difference_rewards: float = \
-        np.abs(proxy_reward - human_evaluated_reward).mean()
+    proxy_reward = np.array(proxy_reward)
+    human_evaluated_reward = np.array(human_evaluated_reward)
+    # Expected difference between the two rewards
+    expected_difference: float = np.abs(proxy_reward - human_evaluated_reward).mean()
     
     number_samples: int = len(proxy_reward)
     
@@ -74,9 +76,9 @@ def get_proxy_value_cutoff(
     proxy_rewards: List[float] = []
     
     # Generate new samples
+    g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
     for _game in range(number_samples):
         game_text: str = infer_game()
-        g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
         proxy_reward = g.evaluate_game_string(str)
         proxy_rewards.append(proxy_reward)
     
