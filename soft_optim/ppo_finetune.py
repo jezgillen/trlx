@@ -12,8 +12,8 @@ if __name__ == "__main__":
     def reward_fn(samples, prompts=None, outputs=None):
         rewards = []
         for s in samples:
-            g = TicTacToeGame()
-            rewards.append(g.get_proxy_reward(s))
+            g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
+            rewards.append(g.evaluate_game_string(s))
         return rewards
 
     tokenizer = AutoTokenizer.from_pretrained('gpt2')
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # collect a tictactoe generator model that was trained with fine_tune.py
     model_path = valid_games_fine_tuned_checkpoint
-    
+
     trainer = trlx.train(
         str(model_path),
         reward_fn=reward_fn,
