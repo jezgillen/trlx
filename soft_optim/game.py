@@ -210,8 +210,10 @@ class TicTacToeGame:
             if self.check_valid_move and len(self.history) > 1:
                 self.validate_move(self.history[-2], self.board)
 
-        except ValueError as e:
-            print(e)
+        except ValueError as _err:
+            return 0, False
+
+        except AssertionError as _err:
             return 0, False
 
         # If valid, perform win checks
@@ -246,16 +248,16 @@ class TicTacToeGame:
 
         # If the game is not valid, return -1
         if not valid:
-            return -1
+            return 0
 
         # If the game is won, return score based on winner
         if outcome == self.board.x:
             return 1
         if outcome == self.board.o:
-            return -1
+            return 0
 
         return 0
-    
+
     def get_proxy_reward(self, game_string: str) -> float:
         '''
         Return a proxy reward for the full game string.
