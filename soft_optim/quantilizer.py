@@ -1,6 +1,7 @@
 from typing import List, Callable
 import numpy as np
 from soft_optim.fine_tune import infer_game
+from game import TicTacToeGame
 
 def empirical_error_bound(
     proxy_reward: np.array,  
@@ -40,8 +41,8 @@ def get_proxy_value_cutoff(error_bound: float, number_samples: int) -> float:
     # Generate new samples
     for _game in range(number_samples):
         game_text: str = infer_game()
-        game = Game(game_text)
-        proxy_reward = game.get_proxy_reward()
+        g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
+        proxy_reward = g.evaluate_game_string(str)
         proxy_rewards.append(proxy_reward)
     
     proxy_rewards_ordered = sorted(proxy_rewards)
