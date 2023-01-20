@@ -11,6 +11,13 @@ from trlx.data.configs import TRLConfig
 import wandb
 from soft_optim.fine_tune import valid_games_fine_tuned_checkpoint
 
+if __name__ == "__main__":
+    def reward_fn(samples, prompts=None, outputs=None):
+        rewards = []
+        for s in samples:
+            g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
+            rewards.append(g.evaluate_game_string(s))
+        return rewards
 
 def proxy_reward(
     samples: List[str], 
