@@ -29,10 +29,10 @@ class TicTacToeBoard:
 
     def __init__(self, string=None):
         # Initialise an empty board
-        self.board_state = np.full((3,3), self.blank, int)
+        self.board_state = np.full((3, 3), self.blank, int)
 
         # Setup the mapping of strings to square values
-        self.map = {self.x:'x', self.o:'o', self.blank: '-'}
+        self.map = {self.x: 'x', self.o: 'o', self.blank: '-'}
 
         # Parse a string representation of the board state, if given
         if string is not None:
@@ -54,23 +54,21 @@ class TicTacToeBoard:
         l = []
         for i in range(3):
             for j in range(3):
-                if self.board_state[i,j] == self.blank:
-                    l.append((i,j,turn))
+                if self.board_state[i, j] == self.blank:
+                    l.append((i, j, turn))
         return l
-
 
     def make_move(self, i, j, player):
         # check if legal
         if i >= 3 or i < 0 or j >= 3 or j < 0:
             print("Index out of bounds")
-        elif self.board_state[i,j] != self.blank:
+        elif self.board_state[i, j] != self.blank:
             print("Not a blank square")
         elif player != self.x and player != self.o:
             print("Invalid player")
 
         # modify board
-        self.board_state[i,j] = player
-
+        self.board_state[i, j] = player
 
     def check_win(self):
         for player in [self.x, self.o]:
@@ -84,7 +82,7 @@ class TicTacToeBoard:
 
             # check diagonals
             elif np.all(np.diag(self.board_state) == player) \
-                    or np.all(np.diag(np.fliplr(self.board_state))== player):
+                    or np.all(np.diag(np.fliplr(self.board_state)) == player):
                 won = True
 
             if won:
@@ -141,34 +139,37 @@ class TicTacToeBoard:
         lines = string.strip("\n").split("\n")
 
         # create a dict that does the opposite of self.map
-        rev_map = {v:k for k,v in self.map.items()}
+        rev_map = {v: k for k, v in self.map.items()}
 
         # iterate over it and convert to state
         for i, line in enumerate(lines):
             l = line.strip(" ").split(" ")
             for j, char in enumerate(l):
-                self.board_state[i,j] = rev_map[char]
+                self.board_state[i, j] = rev_map[char]
+
 
 class TicTacToeGame:
     """ Class to represent a game of Tic Tac Toe at multiple points in time.
     """
+
     def __init__(self,
-            init_board: Optional[str] = None,
-            game_string: Optional[str] = None,
-            check_valid_move:bool = True,
-            check_valid_state:bool = True ):
+                 init_board: Optional[str] = None,
+                 game_string: Optional[str] = None,
+                 check_valid_move: bool = True,
+                 check_valid_state: bool = True):
 
         self.board = TicTacToeBoard(init_board)
-        self.history : List[TicTacToeBoard] = [self.board]
+        self.history: List[TicTacToeBoard] = [self.board]
 
         # Choose which validity checks to perform
-        # Check that the board state has only 'x', 'o', and '-' characters
+        #  Check that the board state has only 'x', 'o', and '-' characters
         self.check_valid_string = True
 
-        # Check that on state change, only one blank piece has changed
-        self.check_valid_move  = check_valid_move
+        #  Check that on state change, only one blank piece has changed
+        self.check_valid_move = check_valid_move
 
-        # Check that the board state is valid, such that #x == #o or #x == #o + 1
+        # Check that the board state is valid, such that #x == #o or #x == #o +
+        # 1
         self.check_valid_state = check_valid_state
 
     def reset(self):
@@ -176,7 +177,8 @@ class TicTacToeGame:
         self.history = [self.board]
         return self
 
-    def validate_move(self, old_state: TicTacToeBoard, new_state: TicTacToeBoard):
+    def validate_move(self, old_state: TicTacToeBoard,
+                      new_state: TicTacToeBoard):
         if self.check_valid_state:
             assert old_state.validate_state()
             assert new_state.validate_state()
@@ -220,16 +222,25 @@ class TicTacToeGame:
         outcome = self.board.check_win()
         return outcome, True
 
-    def validate_game_string(self, game_string: str) -> Tuple[int, bool]:
+    def validate_game_string(
+            self, game_string: str) -> Tuple[bool, float, int]:
+        """Validate the game string
+
+        Args:
+            game_string: Game string
+
+        Returns:
+            Tuple containing isValid, the final outcome and the turn.
+        """
         self.board = TicTacToeBoard()
         self.history = [self.board]
 
         # split game string into board states
         board_strings = game_string.split("\n\n")[1:]
 
-        turn = 0
-        final_outcome = 0
-        final_turn = 0
+        turn: int = 0
+        final_outcome: float = 0
+        final_turn: int = 0
 
         for board_string in board_strings:
             outcome, valid = self.add_state(board_string)
@@ -247,7 +258,7 @@ class TicTacToeGame:
 
         return True, final_outcome, turn
 
-    def evaluate_game_string(self, game_string:str) -> float:
+    def evaluate_game_string(self, game_string: str) -> float:
         valid, outcome, turn = self.validate_game_string(game_string)
 
         # If the game is not valid, return -1
@@ -257,16 +268,16 @@ class TicTacToeGame:
         if not outcome:
             return 0.5
 
-        # Extra rules to better differentiate possible wins
-        reward_delta = 0.05 * ( 9-turn )
+        #  Extra rules to better differentiate possible wins
+        reward_delta = 0.05 * (9 - turn)
         if turn <= 5:
             reward_delta = 0.2
 
         # If the game is won, return score based on winner
         if outcome == self.board.o:
-            return 0.8 + reward_delta # [ 0.8, 1.0]
+            return 0.8 + reward_delta  #  [ 0.8, 1.0]
         if outcome == self.board.x:
-            return 0.2 - reward_delta # [ 0.0, 0.2]
+            return 0.2 - reward_delta  #  [ 0.0, 0.2]
 
         return 0.0
 
@@ -279,20 +290,24 @@ class TicTacToeGame:
         Returns:
             str: Game string
         """
-        game_string_after_start = game_string.split("Let's play Tic Tac Toe:\n")[1]
-        game_string_before_end  = game_string_after_start.split("\n<|endoftext|>")[0]
+        game_string_after_start = game_string.split(
+            "Let's play Tic Tac Toe:\n")[1]
+        game_string_before_end = game_string_after_start.split("\n<|endoftext|>")[
+            0]
         return game_string_before_end
+
 
 def generate_random_game():
     b = TicTacToeBoard()
-    game_state_history = [ str(b) ]
+    game_state_history = [str(b)]
     for t in range(9):
         valid_moves = b.get_valid_moves()
         move = np.random.choice(len(valid_moves))
         b.make_move(*valid_moves[move])
-        game_state_history.append( str(b) )
+        game_state_history.append(str(b))
 
-    return "Let's play Tic Tac Toe:\n" + "\n".join(game_state_history) + "<|endoftext|>"
+    return "Let's play Tic Tac Toe:\n" + \
+        "\n".join(game_state_history) + "<|endoftext|>"
 
 
 def generate_dataset(number_games: int) -> List[str]:
@@ -304,7 +319,7 @@ def generate_dataset(number_games: int) -> List[str]:
     Returns:
         List: List of games (strings with a full game)
     """
-    return [ generate_random_game() for _ in range(number_games) ]
+    return [generate_random_game() for _ in range(number_games)]
 
 
 if __name__ == "__main__":

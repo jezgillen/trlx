@@ -18,6 +18,7 @@ torch = "^1.13.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
 mypy = "^0.991"
+autopep8 = "^2.0.1"
 
 [build-system]
 requires = ["poetry-core"]
