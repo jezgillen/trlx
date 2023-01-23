@@ -84,8 +84,8 @@ def soft_opt_experiment():
         g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
         for s in samples:
             rewards.append(g.evaluate_game_string(s))
-        rewards = np.array(rewards)
-        return loglikelihood_approx(rewards, cutoff)
+        rewards_arr = np.array(rewards)
+        return loglikelihood_approx(rewards_arr, cutoff)
 
     config_path = Path(__file__).parent / "configs/ppo_gpt2.yml"
     config = TRLConfig.load_yaml(config_path)

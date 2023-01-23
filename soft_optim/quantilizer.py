@@ -77,7 +77,7 @@ def get_proxy_value_cutoff(
     
     # Generate new samples
     g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
-    game_text_list: str = infer_game(model, tokenizer, num_samples=number_samples)
+    game_text_list: List[str] = infer_game(model, tokenizer, num_samples=number_samples)
     for game_string in game_text_list:
         proxy_reward = g.evaluate_game_string(game_string)
         proxy_rewards.append(proxy_reward)
