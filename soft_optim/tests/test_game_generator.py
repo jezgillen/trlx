@@ -164,6 +164,9 @@ class TestTicTacToeGameInvalidGames:
         - x -
         - x -"""
 
+    mock_garbage_string: str = \
+        """- 's's's's's's's's's's's's's's's's's's's's's's's's's's's's's's"""
+
     def test_game_invalid_wrong_player_place_many(self):
         game = TicTacToeGame(check_valid_move=False, check_valid_state=False)
         valid, outcome, turn = game.validate_game_string(self.mock_game_o_win_invalid_wrong_player_place_many)
@@ -221,4 +224,13 @@ class TestTicTacToeGameInvalidGames:
 
         game = TicTacToeGame(check_valid_move=True, check_valid_state=True)
         valid, outcome, turn = game.validate_game_string(self.mock_game_x_win_invalid_place_many)
+        assert not valid
+
+    def test_garbage_string(self):
+        game = TicTacToeGame(check_valid_move=False, check_valid_state=False)
+        valid, outcome, turn = game.validate_game_string(self.mock_garbage_string)
+        assert not valid
+
+        game = TicTacToeGame(check_valid_move=True, check_valid_state=True)
+        valid, outcome, turn = game.validate_game_string(self.mock_garbage_string)
         assert not valid
