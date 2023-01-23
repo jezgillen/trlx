@@ -1,10 +1,11 @@
 import trlx
 from trlx.data.configs import TRLConfig
-import math
 from pathlib import Path
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from game import TicTacToeGame
 import soft_optim.quantilizer as quantilizer
+import numpy as np
+from typing import List
 
 
 
@@ -52,31 +53,39 @@ def soft_opt_experiment():
 
     # get samples for gen error calculation
     samples = infer_game(model, tokenizer, num_samples=200)    
-    proxy_rewards = []
-    human_rewards = []
+    proxy_rewards :List[float] = []
+    human_rewards :List[float] = []
     g_proxy = TicTacToeGame(check_valid_move=False, check_valid_state=False)
     g_human = TicTacToeGame()
     for s in samples:
         proxy_rewards.append(g_proxy.evaluate_game_string(s))
         human_rewards.append(g_human.evaluate_game_string(s))
+    proxy_rewards_arr = np.array(proxy_rewards)
+    human_rewards_arr = np.array(human_rewards)
+
     
     # get generalization error
     eps = 0.05 # <5% chance of bound being exceeded
-    bound = quantilizer.empirical_error_bound(proxy_rewards, human_rewards, eps)
+    bound = quantilizer.empirical_error_bound(proxy_rewards_arr, human_rewards_arr, eps)
     # work out proxy reward cutoff
     cutoff = quantilizer.get_proxy_value_cutoff(bound, len(samples), model, tokenizer)
 
     print(bound)
     print(cutoff)
-    exit()
+
+    #def loglikelihood_approx(rewards, cutoff):
+    #    return np.log10(1/(1+np.exp(-(rewards-cutoff))))
+
+    def loglikelihood_approx(rewards, cutoff):
+        return np.log10((rewards > cutoff)+1e-8)
 
     def reward_fn(samples, prompts=None, outputs=None):
         rewards = []
         g = TicTacToeGame(check_valid_move=False, check_valid_state=False)
         for s in samples:
             rewards.append(g.evaluate_game_string(s))
-        return rewards
-
+        rewards = np.array(rewards)
+        return loglikelihood_approx(rewards, cutoff)
 
     config_path = Path(__file__).parent / "configs/ppo_gpt2.yml"
     config = TRLConfig.load_yaml(config_path)
