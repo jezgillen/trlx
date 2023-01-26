@@ -2762,7 +2762,7 @@ vision = ["Pillow"]
 [[package]]
 name = "trlx"
 version = "0.3.0"
-description = ""
+description = "A repo for distributed training of language models with Reinforcement Learning via Human Feedback (RLHF)"
 category = "main"
 optional = false
 python-versions = "*"
@@ -2790,9 +2790,9 @@ dev = ["black", "flake8", "isort", "pre-commit", "pytest", "pytest-cov"]
 
 [package.source]
 type = "git"
-url = "https://github.com/CarperAI/trlx.git"
-reference = "refs/pull/218/merge"
-resolved_reference = "5e3f33bee01a20acd94b2fb8183db15c7fd59dc3"
+url = "https://github.com/pesvut/trlx.git"
+reference = "HEAD"
+resolved_reference = "8c270792508cbf672278af41ef63c4ffa470acaf"
 
 [[package]]
 name = "typeguard"
@@ -3150,4 +3150,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "53ee87168c39aec2b1b53b6a1580fb7a148414d439b4e0395df275ea3a5975c5"
+content-hash = "377beb7638f0697f94d1ded56abee4d38f981a31ae5d0fb1f64776dd0d94cc93"

@@ -66,12 +66,13 @@ def loglikelihood_approx(rewards, cutoff):
 # See https://arxiv.org/pdf/2006.05990.pdf for good defaults
 method_config = PPOConfig(
     name="ppoconfig",
-    num_rollouts=64,
-    chunk_size=64,
+    num_rollouts=16,
+    chunk_size=16,
     # PPO Epochs (running the same batch multiple times in a row)
     # "Go over experience multiple times."
     ppo_epochs=6,
-    init_kl_coef=1,
+    kl_mode="loss",
+    init_kl_coef=0.1,
     target=None,  # type: ignore
     horizon=10000,  # Not used
     # Discount factor
@@ -165,6 +166,7 @@ def soft_opt_experiment(params: Dict[str, float]) -> None:
     # Config
     config = default_config
     config.method.gamma = params["gamma"]  # type: ignore
+    config.method.init_kl_coef = params["init_kl_coef"] # type: ignore
     config.optimizer.kwargs["lr"] = params["lr"]  # type: ignore
     # Float from tuner so must be rounded
     config.train.batch_size = int(params["batch_size"])
@@ -209,7 +211,7 @@ def tune_function(
         search_alg=BayesOptSearch(),
         # scheduler=ASHAScheduler(metric="objective", mode="max"))
         num_samples=-1,  # Keep sampling forever
-        max_concurrent_trials=8
+        max_concurrent_trials=4
     )
 
     # Set the metrics to report to the CLI
@@ -254,9 +256,10 @@ if __name__ == "__main__":
     # below). Note if you add more they must also be set in the
     # soft_opt_experiment function
     param_space: Dict = {
-        "lr": tune.loguniform(1e-3, 1e-7),
+        "lr": tune.loguniform(1e-4, 1e-7),
         "gamma": tune.loguniform(0.95, 1.0),
         # Float to work with search (rounded later)
+        "init_kl_coef": tune.loguniform(1e-3, 1.0),
         "batch_size": tune.loguniform(4, 8),
         "ppo_epochs": tune.loguniform(2, 16)
     }
