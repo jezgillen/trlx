@@ -171,6 +171,6 @@ if __name__ == "__main__":
 
     # Save the model
     if not valid_games_fine_tuned_checkpoint.parent.exists():
-        os.mkdir(valid_games_fine_tuned_checkpoint)
+        os.makedirs(valid_games_fine_tuned_checkpoint, exist_ok=True)
 
     model.save_pretrained(valid_games_fine_tuned_checkpoint)  # type: ignore
