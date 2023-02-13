@@ -54,10 +54,11 @@ def get_cutoff() -> float:
 
 
 def loglikelihood_approx(rewards, cutoff):
-    alpha = 30.0  # hyperparameter determining sharpness of cutoff
-    beta = 1.
-    return np.log(1 / ((1 + np.exp(-alpha * (rewards - cutoff))**(1 / beta))))
-    # return np.log10((rewards > cutoff)+1e-8)
+    alpha = 100.0  # hyperparameter determining sharpness of cutoff
+    beta = 1
+    return np.log(1 / ((1 + np.exp(-alpha * (rewards - cutoff))**(1 /
+                                                                  beta))))
+    # return np.log((rewards > cutoff) + 1e-10)
 
 
 def soft_opt_experiment(params: Dict[str, float]) -> None:
@@ -207,13 +208,13 @@ def single_experiment():
 
     param_dict = {
         "method.init_kl_coef": 1.0,
-        "method.cliprange_reward": 5,  # Default 10
-        "method.cliprange": 0.1,  # Default was 0.2
-        "method.cliprange_value": 0.1,  # Default was 0.2
+        "method.cliprange_reward": 4,  # Default 10
+        "method.cliprange": 0.07,  # Default was 0.2
+        "method.cliprange_value": 0.07,  # Default was 0.2
         "method.ppo_epochs": 4,  # default was 4
         "method.num_rollouts": 64,  # default was 64
         "method.lam": 0.95,  # was 0.95
-        "method.scale_reward": False,  # type: ignore
+        "method.scale_reward": True,  # type: ignore
         "optimizer.kwargs": {
             "lr": 1.0e-5,
             "betas": [0.9, 0.95],
@@ -221,7 +222,7 @@ def single_experiment():
             "weight_decay": 1.0e-6,
         },
         "train.batch_size": 128,
-        "train.epochs": 600,
+        "train.epochs": 6000,
         "train.eval_interval": 20,
 
     }
