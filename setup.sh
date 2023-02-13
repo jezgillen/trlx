@@ -34,7 +34,7 @@ then
       password 7d8ccc80648222cf13a2e1ab9a56484e521be926" >> ~/.netrc
       
     cat 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
-    cat 'alias py="poetry run python" >> ~/.bashrc
+    cat 'alias py="poetry run python"' >> ~/.bashrc
   fi
 fi
 
