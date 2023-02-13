@@ -174,3 +174,26 @@ if __name__ == "__main__":
         os.makedirs(valid_games_fine_tuned_checkpoint, exist_ok=True)
 
     model.save_pretrained(valid_games_fine_tuned_checkpoint)  # type: ignore
+
+    # do initial tests
+    model_path = valid_games_fine_tuned_checkpoint
+    tokenizer = AutoTokenizer.from_pretrained('gpt2')
+    model = AutoModelForCausalLM.from_pretrained(model_path).to('cuda')
+
+    samples = infer_game(model, tokenizer, num_samples=200)
+    proxy_rewards: List[float] = []
+    human_rewards: List[float] = []
+    valid = []
+    g_proxy = TicTacToeGame(check_valid_move=False, check_valid_state=False)
+    g_human = TicTacToeGame()
+    for s in samples:
+        proxy_rewards.append(g_proxy.evaluate_game_string(s))
+        human_rewards.append(g_human.evaluate_game_string(s))
+        valid.append(g_human.validate_game_string(s)[0])
+    proxy_rewards_arr = np.array(proxy_rewards)
+    human_rewards_arr = np.array(human_rewards)
+    print("########################################")
+    print(f"Proxy reward of base model: {np.mean(proxy_rewards_arr)}")
+    print(f"True reward of base model: {np.mean(human_rewards_arr)}")
+    print(f"Validity rate of base model: {np.mean(valid)}")
+    print("########################################")

@@ -55,7 +55,7 @@ def get_cutoff() -> float:
 
 def loglikelihood_approx(rewards, cutoff):
     alpha = 30.0  # hyperparameter determining sharpness of cutoff
-    beta = 1  # 0.3
+    beta = 1.
     return np.log(1 / ((1 + np.exp(-alpha * (rewards - cutoff))**(1 / beta))))
     # return np.log10((rewards > cutoff)+1e-8)
 
@@ -66,6 +66,29 @@ def soft_opt_experiment(params: Dict[str, float]) -> None:
     Args:
         params: Parameters from Ray
     """
+    # do initial tests
+    model_path = valid_games_fine_tuned_checkpoint
+    tokenizer = AutoTokenizer.from_pretrained('gpt2')
+    model = AutoModelForCausalLM.from_pretrained(model_path).to('cuda')
+
+    samples = infer_game(model, tokenizer, num_samples=200)
+    proxy_rewards: List[float] = []
+    human_rewards: List[float] = []
+    valid = []
+    g_proxy = TicTacToeGame(check_valid_move=False, check_valid_state=False)
+    g_human = TicTacToeGame()
+    for s in samples:
+        proxy_rewards.append(g_proxy.evaluate_game_string(s))
+        human_rewards.append(g_human.evaluate_game_string(s))
+        valid.append(g_human.validate_game_string(s)[0])
+    proxy_rewards_arr = np.array(proxy_rewards)
+    human_rewards_arr = np.array(human_rewards)
+    print("########################################")
+    print(f"Proxy reward of base model: {np.mean(proxy_rewards_arr)}")
+    print(f"True reward of base model: {np.mean(human_rewards_arr)}")
+    print(f"Validity rate of base model: {np.mean(valid)}")
+    print("########################################")
+
     # Cutoff
     cutoff = get_cutoff()
 
@@ -85,6 +108,7 @@ def soft_opt_experiment(params: Dict[str, float]) -> None:
         reward_fn=reward_fn,
         config=config,
         prompts=["Let's play Tic Tac Toe:"] * config.train.batch_size,
+        eval_prompts=["Let's play Tic Tac Toe:"] * config.train.batch_size,
         metric_fn=metrics,
     )
 
@@ -142,7 +166,7 @@ def tune_function(
     tuner.fit()
 
 
-if __name__ == "__main__":
+def ray_experiment():
     # Set random seeds
     torch.manual_seed(0)
     np.random.seed(0)
@@ -173,3 +197,36 @@ if __name__ == "__main__":
     # Ray: Tune
     tune.register_trainable(wandb_project_name, soft_opt_experiment)
     tune_function(soft_opt_experiment, param_space, resources)
+
+
+def single_experiment():
+    # Set random seeds
+    torch.manual_seed(0)
+    np.random.seed(0)
+    random.seed(0)
+
+    param_dict = {
+        "method.init_kl_coef": 1.0,
+        "method.cliprange_reward": 5,  # Default 10
+        "method.cliprange": 0.1,  # Default was 0.2
+        "method.cliprange_value": 0.1,  # Default was 0.2
+        "method.ppo_epochs": 4,  # default was 4
+        "method.num_rollouts": 64,  # default was 64
+        "method.lam": 0.95,  # was 0.95
+        "method.scale_reward": False,  # type: ignore
+        "optimizer.kwargs": {
+            "lr": 1.0e-5,
+            "betas": [0.9, 0.95],
+            "eps": 1.0e-8,
+            "weight_decay": 1.0e-6,
+        },
+        "train.batch_size": 128,
+        "train.epochs": 600,
+        "train.eval_interval": 20,
+
+    }
+    soft_opt_experiment(param_dict)
+
+
+if __name__ == "__main__":
+    single_experiment()
