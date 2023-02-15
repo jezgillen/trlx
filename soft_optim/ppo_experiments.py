@@ -1,6 +1,6 @@
 import random
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np
 import ray
@@ -22,7 +22,7 @@ from soft_optim.trlx_config import default_config_override
 wandb_project_name = "soft_optim"
 
 
-def get_cutoff() -> float:
+def get_cutoff() -> Tuple[float, float]:
     """Get the quantilizer cutoff"""
 
     # Model
@@ -47,18 +47,18 @@ def get_cutoff() -> float:
     bound = quantilizer.empirical_error_bound(
         proxy_rewards_arr, human_rewards_arr, eps)
     # work out proxy reward cutoff
-    cutoff = quantilizer.get_proxy_value_cutoff(
+    cutoff, q = quantilizer.get_proxy_value_cutoff(
         bound, len(samples), model, tokenizer)
 
-    return cutoff
+    return cutoff, q
 
 
 def loglikelihood_approx(rewards, cutoff):
-    alpha = 100.0  # hyperparameter determining sharpness of cutoff
-    beta = 1
+    alpha = 30.0  # hyperparameter determining sharpness of cutoff
+    beta = 0.1
     return np.log(1 / ((1 + np.exp(-alpha * (rewards - cutoff))**(1 /
                                                                   beta))))
-    # return np.log((rewards > cutoff) + 1e-10)
+    return np.log((rewards > cutoff) + 1e-3)
 
 
 def soft_opt_experiment(params: Dict[str, float]) -> None:
@@ -91,7 +91,9 @@ def soft_opt_experiment(params: Dict[str, float]) -> None:
     print("########################################")
 
     # Cutoff
-    cutoff = get_cutoff()
+    cutoff, q = get_cutoff()
+    params["method.target"] = -np.log(q)
+    print(q)
 
     def reward_fn(samples, prompts=None, outputs=None):
         rewards = []
@@ -99,6 +101,7 @@ def soft_opt_experiment(params: Dict[str, float]) -> None:
         for s in samples:
             rewards.append(g.evaluate_game_string(s))
         rewards_arr = np.array(rewards)
+        return rewards_arr
         return loglikelihood_approx(rewards_arr, cutoff)
 
     # Set params from Ray
@@ -207,14 +210,16 @@ def single_experiment():
     random.seed(0)
 
     param_dict = {
-        "method.init_kl_coef": 1.0,
-        "method.cliprange_reward": 4,  # Default 10
-        "method.cliprange": 0.07,  # Default was 0.2
-        "method.cliprange_value": 0.07,  # Default was 0.2
+        "method.init_kl_coef": 0.01,
+        "method.target": None,
+        "method.horizon": 1000,  # default 10000
+        "method.cliprange_reward": 5,  # Default 10
+        "method.cliprange": 0.1,  # Default was 0.2
+        "method.cliprange_value": 0.1,  # Default was 0.2
         "method.ppo_epochs": 4,  # default was 4
         "method.num_rollouts": 64,  # default was 64
         "method.lam": 0.95,  # was 0.95
-        "method.scale_reward": True,  # type: ignore
+        "method.scale_reward": False,  # type: ignore
         "optimizer.kwargs": {
             "lr": 1.0e-5,
             "betas": [0.9, 0.95],
@@ -223,7 +228,11 @@ def single_experiment():
         },
         "train.batch_size": 128,
         "train.epochs": 6000,
-        "train.eval_interval": 20,
+        "train.eval_interval": 50,
+        "reward.alpha": 30,
+        "reward.beta": 0.1,
+        "reward.sigmoid": True,
+        "reward.eps": 1e-3,
 
     }
     soft_opt_experiment(param_dict)

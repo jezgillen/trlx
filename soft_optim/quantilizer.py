@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import numpy as np
 from transformers import (AutoModelForCausalLM, PreTrainedTokenizer,
@@ -59,7 +59,7 @@ def get_proxy_value_cutoff(
     number_samples: int,
     model: AutoModelForCausalLM,
     tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
-) -> float:
+) -> Tuple[float, float]:
     """Quantilizer q-value cutoff
 
     Get the q-value cut-off point, such that by randomly selecting from the top q% of
@@ -74,7 +74,8 @@ def get_proxy_value_cutoff(
         number_samples: Number of times to sample policies from the model
 
     Returns:
-        float: Proxy value cut-off (q)
+        float: Proxy value cut-off at q
+        float: q value
     """
     proxy_rewards: List[float] = []
 
@@ -99,4 +100,5 @@ def get_proxy_value_cutoff(
 
     estimated_lower_bound_index = np.argmax(lower_bounds)
 
-    return proxy_rewards_ordered[estimated_lower_bound_index]
+    return proxy_rewards_ordered[estimated_lower_bound_index], \
+        1 - float(estimated_lower_bound_index) / len(proxy_rewards)
