@@ -5,14 +5,13 @@ from typing import List, Union
 
 import numpy as np
 import torch
-import wandb
-
 from datasets import Dataset
 from transformers import (AutoModelForCausalLM, AutoTokenizer, PreTrainedModel,
                           PreTrainedTokenizer, PreTrainedTokenizerFast,
                           Trainer, TrainingArguments)
 from transformers.utils import logging
 
+import wandb
 from soft_optim.game import TicTacToeGame, generate_dataset
 
 
@@ -50,7 +49,7 @@ def create_dataset(tokenizer: AutoTokenizer,
 
 
 valid_games_fine_tuned_checkpoint = Path(
-    __file__).parent / "checkpoints" / "fine_tuned_gpt2"
+    __file__).parent / ".checkpoints" / "fine_tuned_gpt2"
 
 
 def fine_tune(

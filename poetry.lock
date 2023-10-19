@@ -2802,9 +2802,9 @@ dev = ["black", "flake8", "isort", "pre-commit", "pytest", "pytest-cov"]
 
 [package.source]
 type = "git"
-url = "https://github.com/CarperAI/trlx.git"
+url = "https://github.com/pesvut/trlx.git"
 reference = "HEAD"
-resolved_reference = "ce5bf572c7d210f9a02fa3734eb3e2266bdc6e3c"
+resolved_reference = "8eece25df63e73064a0c6e7e9a3ab14faa9621e0"
 
 [[package]]
 name = "typeguard"
@@ -3162,4 +3162,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "bca2624a4cf56487fc7a9a4ee7137e425686a2123ad088a817818149581ac377"
+content-hash = "6c075dde95722de437c0a7d0edae9d607a9d33210f0a1a35a266f75433eea8a3"

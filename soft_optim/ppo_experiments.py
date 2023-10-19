@@ -184,7 +184,7 @@ def ray_experiment():
     # Good choices from https://arxiv.org/pdf/2006.05990.pdf (in comments
     # below). Must be set using deep dictionary notation.
     param_space: Dict = {
-        "method.init_kl_coef": tune.loguniform(0.1, 1),
+        "method.init_kl_coef": tune.loguniform(0.01, 1),
         "optimizer.kwargs.lr": tune.loguniform(1e-5, 1e-7),
         # "method.gamma": tune.loguniform(0.95, 1.0),
         # # Float to work with search (rounded later)

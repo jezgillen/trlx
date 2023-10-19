@@ -17,6 +17,8 @@ method_config = PPOConfig(
     # "Go over experience multiple times."
     ppo_epochs=6,
     init_kl_coef=0.3,
+    # Fixed KL gradients & actual rather than estimate
+    kl_mode="loss",  # type: ignore
     target=None,  # type: ignore
     horizon=10000,  # Not used
     # Discount factor
